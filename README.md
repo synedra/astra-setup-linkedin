@@ -10,6 +10,11 @@ To setup your ASTRA instance, you want to run `npm exec astra-setup`
 
 This will do the following:
 * Have you go to your [Astra Database](https://datastx.io/workshops) to register or login
+  * There is no credit card required to sign up
+  * The 'Pay as you go' option gives you a huge amount of transactions for free:
+   * 30 million reads
+   * 5 million writes
+   * 40 gigabytes of storage
 * Give steps to grab a Database Administrator Token and paste it into the input field
 * Ask you what database you want to use (default, existing, create)
 * Create or access the database
