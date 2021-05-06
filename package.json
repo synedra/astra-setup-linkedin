@@ -4,10 +4,10 @@
   "description": "Netlify Build plugin - This plugin connects your netlify instance to an Astra database backend, including a managed Cassandra database and HTTP APIs through Stargate.",
   "main": "src/astra-setup.js",
   "files": [
-    "astra-setup.js"
+    "src/astra-setup.js"
   ],
   "bin": [
-    "astra-setup.js"
+    "src/astra-setup.js"
   ],
   "keywords": [
     "astra"
