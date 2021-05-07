@@ -1,5 +1,10 @@
 # astra-setup
 
+## Prerequisites
+* node.js version 15+
+* npm version 7+
+* These can be updated using instructions [here](https://www.whitesourcesoftware.com/free-developer-tools/blog/update-node-js/).
+
 ## Getting the module
 The easiest way to grab this for use in your project is to use `npm install astra-setup`.
 
