@@ -241,7 +241,7 @@ async function getTokens() {
 
 		let admin_token = response.token.replace(/"/g, '');
 		setEnv({ ASTRA_DB_ADMIN_TOKEN: admin_token });
-		setEnv({ ASTRA_DB_APPLICATION_TOKEN: application_token });
+		setEnv({ ASTRA_DB_APPLICATION_TOKEN: admin_token });
 	}
 	return dotenv;
 }
