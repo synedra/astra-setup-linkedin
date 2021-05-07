@@ -45,7 +45,7 @@ class astraClient {
 		this.token = ASTRA_DB_ADMIN_TOKEN;
 	}
 
-	async createClient(ASTRA_DB_ADMIN_TOKEN) {
+	async createClient() {
 		this.client = await astraRest.createClient({
 			applicationToken: this.token,
 			baseUrl: 'https://api.astra.datastax.com',
@@ -67,9 +67,9 @@ class astraClient {
 		}
 
 		dbID = this.db.value;
-		setEnv({ ASTRA_DB_ID: this.db.value });
-		setEnv({ ASTRA_DB_REGION: this.db.region });
-		setEnv({ ASTRA_DB_KEYSPACE: astra_keyspace });
+		setEnv("ASTRA_DB_ID", this.db.value );
+		setEnv("ASTRA_DB_REGION", this.db.region);
+		setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
 
 		// Check for the keyspace
 		console.log(chalk.green('Checking for keyspace ' + astra_keyspace));
@@ -240,8 +240,9 @@ async function getTokens() {
 		const response = await prompts(questions);
 
 		let admin_token = response.token.replace(/"/g, '');
-		setEnv({ ASTRA_DB_ADMIN_TOKEN: admin_token });
-		setEnv({ ASTRA_DB_APPLICATION_TOKEN: admin_token });
+		setEnv("ASTRA_DB_ADMIN_TOKEN",  admin_token);
+		setEnv("ASTRA_DB_APPLICATION_TOKEN",  admin_token);
+		console.log(process.env.ASTRA_DB_ADMIN_TOKEN)
 	}
 	return dotenv;
 }
