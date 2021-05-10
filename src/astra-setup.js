@@ -9,7 +9,7 @@ const readline = require('readline');
 const axios = require('axios');
 const dotenv = require('parsenv');
 const jq = require('node-jq');
-const ConfigParser = require('ConfigParser')
+const ConfigParser = require('configparser')
 
 let response = '';
 const argv_database = process.argv[2] ? process.argv[2] : ''
