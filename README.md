@@ -6,7 +6,10 @@
 * These can be updated using instructions [here](https://www.whitesourcesoftware.com/free-developer-tools/blog/update-node-js/).
 
 ## Getting the module
-The easiest way to grab this for use in your project is to use `npm install astra-setup`.
+The easiest way to grab this for use in your project is to do the following:
+* Make sure you have the most recent npm: `npm install -g npm@latest`
+* Install astra-js `npm install -g astra-setup`.
+* Run the command: `npm exec astra-setup`
 
 Alternately, you can clone this repository and run `npm install` to pull in requirements.
 
