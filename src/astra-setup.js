@@ -392,7 +392,7 @@ async function start() {
 }
 
 async function setEnv(variable, value) {
-	dotenv.edit({ variable: value });
+	dotenv.edit({ [variable]: value });
 	astraconfig.set(astra_section,variable, value)
 	process.env[variable] = value
 	dotenv.write(config);
