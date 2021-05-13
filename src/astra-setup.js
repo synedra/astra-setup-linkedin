@@ -285,7 +285,7 @@ async function start() {
 			keyspaces.forEach(keyspace => {
 				if (keyspace.value == argv_keyspace) {
 					found = 1
-					setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
+					setEnv("ASTRA_DB_KEYSPACE", argv_keyspace );
 				}
 			})
 			if (found == 1) {
