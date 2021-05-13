@@ -79,10 +79,12 @@ class astraClient {
 			if (keyspace.value == astra_keyspace) {
 				console.log(chalk.green('    keyspace ' + astra_keyspace + ' found'));
 				keyspace_found = 1;
+				setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
 			}
 			if (keyspace_found != 1) {
 				console.log('    creating new ' + astra_keyspace + ' keyspace');
 				await client.createNewKeyspace(client.db.value, astra_keyspace);
+				setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
 			}
 		});
 	}
@@ -164,6 +166,9 @@ class astraClient {
 				if (database.title == astra_database && database.status != 'TERMINATING') {
 					this.database_list = [];
 					this.db = database;
+					setEnv("ASTRA_DB_ID", this.db.value );
+					setEnv("ASTRA_DB_REGION", this.db.region);
+
 					console.log(chalk.yellow('     ' + astra_database + ': Current status is ' + database.status));
 				}
 				if (this.db && this.db.status == 'ACTIVE' && complete == null) {
@@ -213,6 +218,8 @@ class astraClient {
 		console.log(chalk.yellow('     Creating new ' + astra_keyspace + ' keyspace'));
 		response = await this.client.post('/v2/databases/' + db + '/keyspaces/' + astra_keyspace);
 		console.log(chalk.yellow('     ...created'));
+		setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
+
 	}
 }
 
@@ -278,6 +285,7 @@ async function start() {
 			keyspaces.forEach(keyspace => {
 				if (keyspace.value == argv_keyspace) {
 					found = 1
+					setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
 				}
 			})
 			if (found == 1) {
@@ -286,7 +294,9 @@ async function start() {
 				await client.createNewKeyspace(existing.id, argv_keyspace)	
 				console.log(chalk.yellow("    keyspace " + argv_keyspace + " created"))			
 			}
-
+			setEnv("ASTRA_DB_ID", client.db.value );
+			setEnv("ASTRA_DB_REGION", client.db.region);
+			setEnv("ASTRA_DB_KEYSPACE", argv_keyspace );
 		}
 		return;
 	}
