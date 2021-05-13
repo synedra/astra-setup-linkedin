@@ -142,18 +142,12 @@ class astraClient {
 				}
 				if (this.db && this.db.status == 'ACTIVE' && complete == null) {
 					complete = 1;
-					setEnv("ASTRA_DB_ID", this.db.value );
-					setEnv("ASTRA_DB_REGION", this.db.region);
-					setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
 					return this.db;
 				}
 			}
 		});
 		if (this.db && retry) {
 			let dbActive = await this.requestWithRetry('/v2/databases/' + this.db.id);
-			setEnv("ASTRA_DB_ID", this.db.value );
-			setEnv("ASTRA_DB_REGION", this.db.region);
-			setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
 			return this.db;
 		}
 		return null;
@@ -174,18 +168,12 @@ class astraClient {
 				}
 				if (this.db && this.db.status == 'ACTIVE' && complete == null) {
 					complete = 1;
-					setEnv("ASTRA_DB_ID", this.db.value );
-					setEnv("ASTRA_DB_REGION", this.db.region);
-					setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
 					return this.db;
 				}
 			}
 		});
 		if (this.db && retry) {
 			let dbActive = await this.requestWithRetry('/v2/databases/' + this.db.id);
-			setEnv("ASTRA_DB_ID", this.db.value );
-			setEnv("ASTRA_DB_REGION", this.db.region);
-			setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
 			return this.db;
 		}
 		return null;
