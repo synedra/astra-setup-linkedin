@@ -333,7 +333,10 @@ async function start() {
 			];
 			answers = await prompts(questions);
 			await client.createDB(answers.database, answers.keyspace);
-			await client.findDatabasebyName(answers.database, true);
+			db = await client.findDatabasebyName(answers.database, true);
+			setEnv("ASTRA_DB_ID", client.db.value );
+			setEnv("ASTRA_DB_REGION", client.db.region);
+			setEnv("ASTRA_DB_KEYSPACE", answers.keyspace );
 			break;
 		case 2:
 			console.log('Choose');
@@ -395,6 +398,7 @@ async function start() {
 				await client.createDB(client.db.title, keyspace.keyspace);
 				await client.findDatabasebyName(client.db.title, true);
 			}
+			setEnv("ASTRA_DB_KEYSPACE", keyspace.keyspace );
 
 			process.exit();
 			break;
