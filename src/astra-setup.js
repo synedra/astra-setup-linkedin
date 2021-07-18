@@ -47,10 +47,28 @@ class astraClient {
 
 	async createClient() {
 		this.client = await astraRest.createClient({
-			applicationToken: this.token,
-			baseUrl: 'https://api.astra.datastax.com',
-		});
+				applicationToken: this.token,
+				baseUrl: 'https://api.astra.datastax.com',
+			});
+
+		try {
+			await this.checkAuth();
+		} catch(e) {
+			fs.unlinkSync('.env')
+			throw e
+		}
+	
+	};
+
+	async checkAuth() {
+		this.keyspaces = [];
+		try {
+			response = await this.client.get('/v2/databases/');
+		} catch {
+			throw new Error("Invalid token")
+		}
 	}
+
 	// First, check for a database
 	async setUpDatabase(astra_database = 'default', astra_keyspace = 'default') {
 		// The first thing we want to do is get a list of databases
@@ -233,7 +251,6 @@ function wait(timeout) {
 
 async function getTokens() {
 	let data = {};
-	if (!process.env['ASTRA_DB_APPLICATION_TOKEN']) {
 		console.log('Login to Astra at https://dstx.io/workshops');
 		console.log('After login, you can create a database.');
 		console.log('Click on your name in the left-hand column');
@@ -249,8 +266,6 @@ async function getTokens() {
 		let admin_token = response.token.replace(/"/g, '');
 		setEnv("ASTRA_DB_ADMIN_TOKEN",  admin_token);
 		setEnv("ASTRA_DB_APPLICATION_TOKEN",  admin_token);
-		console.log(process.env.ASTRA_DB_ADMIN_TOKEN)
-	}
 	return dotenv;
 }
 
@@ -268,7 +283,12 @@ async function start() {
 	}
 	axios.defaults.headers.common['Authorization'] = 'Bearer ' + process.env.ASTRA_DB_ADMIN_TOKEN;
 	client = new astraClient(process.env.ASTRA_DB_ADMIN_TOKEN);
-	await client.createClient();
+	try {
+		await client.createClient();
+	}catch {
+		console.log(chalk.red('Invalid token'));
+		process.exit(0);
+	}
 
 	console.log(chalk.yellow('Credentials set up, checking database'));
 	if (argv_database != '' && argv_keyspace != '') {
@@ -326,7 +346,6 @@ async function start() {
 			await client.setUpDatabase('astra', 'stargate');
 			break;
 		case 1:
-			console.log('Create');
 			questions = [
 				{ type: 'text', name: 'database', message: 'Please enter your database name here: ' },
 				{ type: 'text', name: 'keyspace', message: 'Please enter your keyspace name here: ' },
@@ -339,7 +358,6 @@ async function start() {
 			setEnv("ASTRA_DB_KEYSPACE", answers.keyspace );
 			break;
 		case 2:
-			console.log('Choose');
 			await client.findDatabases();
 			let dbList = client.database_list;
 			let choices = [];
