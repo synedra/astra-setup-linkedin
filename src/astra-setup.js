@@ -1,4 +1,4 @@
-#! /usr/bin/env node
+#!/usr/bin/env node
 const astraCollections = require('@astrajs/collections');
 const astraRest = require('@astrajs/rest');
 const chalk = require('chalk');

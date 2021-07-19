@@ -6,9 +6,7 @@
   "files": [
     "src/astra-setup.js"
   ],
-  "bin": [
-    "src/astra-setup.js"
-  ],
+  "bin": "src/astra-setup.js",
   "keywords": [
     "astra"
   ],
