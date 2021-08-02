@@ -296,6 +296,7 @@ async function start() {
 		if (!existing ) {
 			await client.createDB(argv_database, argv_keyspace);
 			await client.findDatabasebyName(argv_database, true);
+			setEnv("ASTRA_DB_KEYSPACE", argv_keyspace );
 		} else { 
 			console.log (chalk.yellow('    existing ' + argv_database + ' database found.'))
 			let keyspaces = await client.findKeyspaces(existing.id);
