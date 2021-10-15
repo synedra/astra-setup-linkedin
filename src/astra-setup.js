@@ -64,7 +64,8 @@ class astraClient {
 		this.keyspaces = [];
 		try {
 			response = await this.client.get('/v2/databases/');
-		} catch {
+		} catch (e) {
+			console.log(e)
 			throw new Error("Invalid token")
 		}
 	}
@@ -318,6 +319,7 @@ async function start() {
 			setEnv("ASTRA_DB_ID", client.db.value );
 			setEnv("ASTRA_DB_REGION", client.db.region);
 			setEnv("ASTRA_DB_KEYSPACE", argv_keyspace );
+			setEnv("ASTRA_GRAPHQL_ENDPOINT", "https://" + client.db.value + "-" + client.db.region + ".apps.astra.datastax.com/api/graphql/" + client.db.keyspace)
 		}
 		return;
 	}
