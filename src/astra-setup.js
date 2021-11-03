@@ -135,6 +135,7 @@ class astraClient {
 		setEnv("ASTRA_DB_ID", this.db.value );
 		setEnv("ASTRA_DB_REGION", this.db.region);
 		setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
+		await this.getBundle(dbID)
 
 		// Check for the keyspace
 		console.log(chalk.green('Checking for keyspace ' + astra_keyspace));
@@ -152,8 +153,6 @@ class astraClient {
 				setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
 			}
 		});
-		let paths = await this.getBundle(dbID)
-		console.log(paths)
 	}
 	async findDatabases() {
 		axios.defaults.headers.common['Authorization'] = 'Bearer ' + process.env.ASTRA_DB_ADMIN_TOKEN;
