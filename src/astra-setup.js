@@ -154,7 +154,7 @@ class astraClient {
 		});
 
 		console.log("Setting up secure bundle")
-		await this.getBundle(client.db.value)
+		await client.getBundle(client.db.value)
 	}
 
 	async findDatabases() {
