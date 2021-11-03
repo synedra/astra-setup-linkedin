@@ -10,6 +10,10 @@ const axios = require('axios');
 const dotenv = require('parsenv');
 const jq = require('node-jq');
 const ConfigParser = require('configparser')
+const request = require("request")
+const unzipper = require("unzipper")
+const https = require("https")
+const fstream = require("fstream")
 
 let response = '';
 const argv_database = process.argv[2] ? process.argv[2] : ''
@@ -60,6 +64,48 @@ class astraClient {
 	
 	};
 
+	async getBundle(databaseId) {
+			let path = '/v2/databases/' + databaseId + '/secureBundleURL'
+			response = await this.client.post(path);
+			let downloadURL = response.data.downloadURL;
+			
+			var output = os.homedir() + '/.cassandra/' + "bootstrap.zip";
+				try {
+					if (fs.existsSync(os.homedir() + '/.cassandra/')) {
+				 	 //directory exists, all good
+					} else {
+						fs.mkdir(os.homedir() + '/.cassandra', (err) => {
+							if (err) {
+								return console.error("Creating dir: " + err);
+							}
+							console.log('.cassandra Directory created successfully!');
+						});
+					}
+				} catch(e) {
+					throw e
+				}
+
+				const axios = require('axios');
+				delete axios.defaults.headers.common['Authorization'];
+
+				await this.getZip(downloadURL)
+				fs.createReadStream(os.homedir() + '/.cassandra/bootstrap.zip')
+  						.pipe(unzipper.Extract({ path: os.homedir() + '/.cassandra' }));
+				}
+			
+	async getZip(downloadURL) {
+		return new Promise((resolve) => {
+			https.get(downloadURL, response => {
+				response.on('data', function(data) {
+						fs.appendFileSync(os.homedir() + '/.cassandra/bootstrap.zip', data);
+					});
+					response.on('end', () => {
+	
+				   resolve();
+				})
+			})})
+	}
+
 	async checkAuth() {
 		this.keyspaces = [];
 		try {
@@ -106,6 +152,8 @@ class astraClient {
 				setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
 			}
 		});
+		let paths = await this.getBundle(dbID)
+		console.log(paths)
 	}
 	async findDatabases() {
 		axios.defaults.headers.common['Authorization'] = 'Bearer ' + process.env.ASTRA_DB_ADMIN_TOKEN;
