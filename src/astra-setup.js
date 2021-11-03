@@ -152,8 +152,7 @@ class astraClient {
 				setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
 			}
 		});
-		console.log("Setting up secure bundle")
-		await this.getBundle(dbID)
+
 	}
 
 	async findDatabases() {
@@ -365,11 +364,14 @@ async function start() {
 				await client.createNewKeyspace(existing.id, argv_keyspace)	
 				console.log(chalk.yellow("    keyspace " + argv_keyspace + " created"))			
 			}
+			console.log("Setting up secure bundle")
+			await this.getBundle(dbID)
 			setEnv("ASTRA_DB_ID", client.db.value );
 			setEnv("ASTRA_DB_REGION", client.db.region);
 			setEnv("ASTRA_DB_KEYSPACE", argv_keyspace );
 			setEnv("ASTRA_GRAPHQL_ENDPOINT", "https://" + client.db.value + "-" + client.db.region + ".apps.astra.datastax.com/api/graphql/" + client.db.keyspace)
 		}
+		
 		return;
 	}
 	let onSubmit = (prompt, answer) => console.log(`Thanks, moving forward with: ${answer}`);
