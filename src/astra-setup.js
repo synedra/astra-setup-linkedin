@@ -153,6 +153,8 @@ class astraClient {
 			}
 		});
 
+		console.log("Setting up secure bundle")
+		await this.getBundle(client.db.value)
 	}
 
 	async findDatabases() {
@@ -365,7 +367,8 @@ async function start() {
 				console.log(chalk.yellow("    keyspace " + argv_keyspace + " created"))			
 			}
 			console.log("Setting up secure bundle")
-			await this.getBundle(dbID)
+			await client.getBundle(client.db.value)
+			
 			setEnv("ASTRA_DB_ID", client.db.value );
 			setEnv("ASTRA_DB_REGION", client.db.region);
 			setEnv("ASTRA_DB_KEYSPACE", argv_keyspace );
