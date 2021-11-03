@@ -84,6 +84,7 @@ class astraClient {
 				} catch(e) {
 					throw e
 				}
+				fs.unlink(os.homedir() + '/.cassandra/cqlshrc')
 
 				const axios = require('axios');
 				delete axios.defaults.headers.common['Authorization'];
