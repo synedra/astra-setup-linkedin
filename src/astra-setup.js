@@ -180,6 +180,16 @@ class astraClient {
 		});
 	}
 
+	async getNewAuthToken() {
+		axios.defaults.headers.common['Authorization'] = 'Bearer ' + process.env.ASTRA_DB_ADMIN_TOKEN;
+		let payload = {"roles":["1faa93f2-b889-4190-9585-4bc6e3c3595a"]}
+		response = await this.client.post('/v2/clientIdSecrets', payload);
+		setEnv("ASTRA_DB_ADMIN_TOKEN", response.data.token );
+		setEnv("ASTRA_DB_CLIENT_ID", response.data.clientId );
+		setEnv("ASTRA_DB_CLIENT_SECRET", response.data.secret );
+
+	}
+
 	async requestWithRetry(url) {
 		const MAX_RETRIES = 20;
 		for (let i = 1; i <= MAX_RETRIES; i++) {
@@ -317,6 +327,7 @@ async function getTokens() {
 		let admin_token = response.token.replace(/"/g, '');
 		setEnv("ASTRA_DB_ADMIN_TOKEN",  admin_token);
 		setEnv("ASTRA_DB_APPLICATION_TOKEN",  admin_token);
+
 	return dotenv;
 }
 
@@ -340,6 +351,9 @@ async function start() {
 		console.log(chalk.red('Invalid token'));
 		process.exit(0);
 	}
+
+	let newToken = await client.getNewAuthToken();
+	console.log(newToken)
 
 	console.log(chalk.yellow('Credentials set up, checking database'));
 	if (argv_database != '' && argv_keyspace != '') {
@@ -366,7 +380,7 @@ async function start() {
 				await client.createNewKeyspace(existing.id, argv_keyspace)	
 				console.log(chalk.yellow("    keyspace " + argv_keyspace + " created"))			
 			}
-			
+
 			console.log("Setting up secure bundle")
 			await client.getBundle(client.db.value)
 			
