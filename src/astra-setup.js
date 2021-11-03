@@ -366,6 +366,7 @@ async function start() {
 				await client.createNewKeyspace(existing.id, argv_keyspace)	
 				console.log(chalk.yellow("    keyspace " + argv_keyspace + " created"))			
 			}
+			
 			console.log("Setting up secure bundle")
 			await client.getBundle(client.db.value)
 			
