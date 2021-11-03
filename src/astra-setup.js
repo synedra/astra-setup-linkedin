@@ -184,7 +184,6 @@ class astraClient {
 		axios.defaults.headers.common['Authorization'] = 'Bearer ' + process.env.ASTRA_DB_ADMIN_TOKEN;
 		let payload = {"roles":["1faa93f2-b889-4190-9585-4bc6e3c3595a"]}
 		response = await this.client.post('/v2/clientIdSecrets', payload);
-		setEnv("ASTRA_DB_ADMIN_TOKEN", response.data.token );
 		setEnv("ASTRA_DB_CLIENT_ID", response.data.clientId );
 		setEnv("ASTRA_DB_CLIENT_SECRET", response.data.secret );
 
