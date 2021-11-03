@@ -353,7 +353,6 @@ async function start() {
 	}
 
 	let newToken = await client.getNewAuthToken();
-	console.log(newToken)
 
 	console.log(chalk.yellow('Credentials set up, checking database'));
 	if (argv_database != '' && argv_keyspace != '') {
@@ -362,8 +361,7 @@ async function start() {
 			await client.createDB(argv_database, argv_keyspace);
 			await client.findDatabasebyName(argv_database, true);
 			setEnv("ASTRA_DB_KEYSPACE", argv_keyspace );
-			console.log("Setting up secure bundle")
-			await client.getBundle(client.db.value)
+			
 		} else { 
 			console.log (chalk.yellow('    existing ' + argv_database + ' database found.'))
 			let keyspaces = await client.findKeyspaces(existing.id);
@@ -387,7 +385,10 @@ async function start() {
 			setEnv("ASTRA_DB_REGION", client.db.region);
 			setEnv("ASTRA_DB_KEYSPACE", argv_keyspace );
 			setEnv("ASTRA_GRAPHQL_ENDPOINT", "https://" + client.db.value + "-" + client.db.region + ".apps.astra.datastax.com/api/graphql/" + client.db.keyspace)
+			console.log(chalk.yellow("Setting up secure bundle"))
+			await client.getBundle(client.db.value)
 		}
+		
 		
 		return;
 	}
