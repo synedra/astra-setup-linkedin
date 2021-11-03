@@ -362,6 +362,8 @@ async function start() {
 			await client.createDB(argv_database, argv_keyspace);
 			await client.findDatabasebyName(argv_database, true);
 			setEnv("ASTRA_DB_KEYSPACE", argv_keyspace );
+			console.log("Setting up secure bundle")
+			await client.getBundle(client.db.value)
 		} else { 
 			console.log (chalk.yellow('    existing ' + argv_database + ' database found.'))
 			let keyspaces = await client.findKeyspaces(existing.id);
@@ -380,9 +382,6 @@ async function start() {
 				await client.createNewKeyspace(existing.id, argv_keyspace)	
 				console.log(chalk.yellow("    keyspace " + argv_keyspace + " created"))			
 			}
-
-			console.log("Setting up secure bundle")
-			await client.getBundle(client.db.value)
 			
 			setEnv("ASTRA_DB_ID", client.db.value );
 			setEnv("ASTRA_DB_REGION", client.db.region);
