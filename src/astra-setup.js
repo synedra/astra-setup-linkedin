@@ -85,20 +85,21 @@ class astraClient {
 					throw e
 				}
 
-				fs.unlink(os.homedir() + '/.cassandra/cqlshrc', (err => {
-					if (err) console.log(err);
-					else {
-					  console.log("\nDeleted file: cqlshrc");
-					}
-				  }));
-
 				const axios = require('axios');
 				delete axios.defaults.headers.common['Authorization'];
 
 				await this.getZip(downloadURL)
 				fs.createReadStream(os.homedir() + '/.cassandra/bootstrap.zip')
   						.pipe(unzipper.Extract({ path: os.homedir() + '/.cassandra' }));
+
+				fs.unlink(os.homedir() + '/.cassandra/cqlshrc', (err => {
+					if (err) console.log(err);
+					else {
+					  console.log("\nDeleted file: cqlshrc");
+					}
+				  }));
 				}
+
 			
 	async getZip(downloadURL) {
 		return new Promise((resolve) => {
