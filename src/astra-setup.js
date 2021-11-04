@@ -161,9 +161,8 @@ class astraClient {
 				setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
 			}
 		});
-
 		console.log("Setting up secure bundle")
-		await client.getBundle(client.db.value)
+		await client.getBundle(this.db.id)
 	}
 
 	async findDatabases() {
@@ -204,6 +203,7 @@ class astraClient {
 			let response = await this.client.get(url);
 			console.log(chalk.yellow('         ... status is ' + response.data.status));
 			if (response && response.data.status == 'ACTIVE') {
+				
 				return response;
 			} else {
 				const timeout = 5000 * i * 10;
@@ -369,6 +369,8 @@ async function start() {
 			await client.createDB(argv_database, argv_keyspace);
 			await client.findDatabasebyName(argv_database, true);
 			setEnv("ASTRA_DB_KEYSPACE", argv_keyspace );
+			console.log(chalk.yellow("Setting up secure bundle"))
+			await client.getBundle(client.db.id)
 			
 		} else { 
 			console.log (chalk.yellow('    existing ' + argv_database + ' database found.'))
@@ -498,9 +500,15 @@ async function start() {
 			}
 			setEnv("ASTRA_DB_KEYSPACE", keyspace.keyspace );
 
-			process.exit();
+			
 			break;
 	}
+	console.log(chalk.yellow("Setting up secure bundle"))
+	await client.getBundle(client.db.id)
+
+	process.exit();
+			
+	
 }
 
 async function setEnv(variable, value) {
