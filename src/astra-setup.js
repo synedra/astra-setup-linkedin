@@ -89,8 +89,9 @@ class astraClient {
 				delete axios.defaults.headers.common['Authorization'];
 
 				await this.getZip(downloadURL)
-				fs.createReadStream(os.homedir() + '/.cassandra/bootstrap.zip')
-  						.pipe(unzipper.Extract({ path: os.homedir() + '/.cassandra' }));
+				await fs.createReadStream(os.homedir() + '/.cassandra/bootstrap.zip')
+					.pipe(unzipper.Extract({ path: os.homedir() + '/.cassandra/'}))
+					.promise()
 
 				fs.unlink(os.homedir() + '/.cassandra/cqlshrc', (err => {
 					if (err) console.log(err);
