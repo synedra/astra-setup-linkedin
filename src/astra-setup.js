@@ -1,3 +1,4 @@
+
 #!/usr/bin/env node
 const astraCollections = require('@astrajs/collections');
 const astraRest = require('@astrajs/rest');
@@ -10,6 +11,10 @@ const axios = require('axios');
 const dotenv = require('parsenv');
 const jq = require('node-jq');
 const ConfigParser = require('configparser')
+const request = require("request")
+const unzipper = require("unzipper")
+const https = require("https")
+const fstream = require("fstream")
 
 let response = '';
 const argv_database = process.argv[2] ? process.argv[2] : ''
@@ -61,23 +66,55 @@ class astraClient {
 	};
 
 	async getBundle(databaseId) {
-		this.client = await astraRest.createClient({
-				applicationToken: this.token,
-				baseUrl: 'https://api.astra.datastax.com',
-			});
+			let path = '/v2/databases/' + databaseId + '/secureBundleURL'
+			response = await this.client.post(path);
+			let downloadURL = response.data.downloadURL;
+			
+			var output = os.homedir() + '/.cassandra/' + "bootstrap.zip";
+				try {
+					if (fs.existsSync(os.homedir() + '/.cassandra/')) {
+				 	 //directory exists, all good
+					} else {
+						fs.mkdir(os.homedir() + '/.cassandra', (err) => {
+							if (err) {
+								return console.error("Creating dir: " + err);
+							}
+							console.log('.cassandra Directory created successfully!');
+						});
+					}
+				} catch(e) {
+					throw e
+				}
 
-		try {
-				response = await this.client.get('/v2/databases/' + databaseId + '/secureBundleURL');
-				console.log("URL: " + response)
-				setEnv("ASTRA_BUNDLE", response );
-				return response
-				
-			} catch (e) {
-				console.log(e)
-				throw new Error("Invalid token")
-			}
+				const axios = require('axios');
+				delete axios.defaults.headers.common['Authorization'];
+
+				await this.getZip(downloadURL)
+				await fs.createReadStream(os.homedir() + '/.cassandra/bootstrap.zip')
+					.pipe(unzipper.Extract({ path: os.homedir() + '/.cassandra/'}))
+					.promise()
+
+				fs.unlink(os.homedir() + '/.cassandra/cqlshrc', (err => {
+					if (err) console.log(err);
+					else {
+					  console.log("\nDeleted file: cqlshrc");
+					}
+				  }));
+				}
+
+			
+	async getZip(downloadURL) {
+		return new Promise((resolve) => {
+			https.get(downloadURL, response => {
+				response.on('data', function(data) {
+						fs.appendFileSync(os.homedir() + '/.cassandra/bootstrap.zip', data);
+					});
+					response.on('end', () => {
 	
-	};
+				   resolve();
+				})
+			})})
+	}
 
 	async checkAuth() {
 		this.keyspaces = [];
@@ -105,7 +142,6 @@ class astraClient {
 		}
 
 		dbID = this.db.value;
-		console.log(this.db);
 		setEnv("ASTRA_DB_ID", this.db.value );
 		setEnv("ASTRA_DB_REGION", this.db.region);
 		setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
@@ -126,10 +162,10 @@ class astraClient {
 				setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
 			}
 		});
-
-		// Get the zip bundle
-
+		console.log("Setting up secure bundle")
+		await client.getBundle(this.db.id)
 	}
+
 	async findDatabases() {
 		axios.defaults.headers.common['Authorization'] = 'Bearer ' + process.env.ASTRA_DB_ADMIN_TOKEN;
 		this.database_list = [];
@@ -153,12 +189,22 @@ class astraClient {
 		});
 	}
 
+	async getNewAuthToken() {
+		axios.defaults.headers.common['Authorization'] = 'Bearer ' + process.env.ASTRA_DB_ADMIN_TOKEN;
+		let payload = {"roles":["1faa93f2-b889-4190-9585-4bc6e3c3595a"]}
+		response = await this.client.post('/v2/clientIdSecrets', payload);
+		setEnv("ASTRA_DB_CLIENT_ID", response.data.clientId );
+		setEnv("ASTRA_DB_CLIENT_SECRET", response.data.secret );
+
+	}
+
 	async requestWithRetry(url) {
 		const MAX_RETRIES = 20;
 		for (let i = 1; i <= MAX_RETRIES; i++) {
 			let response = await this.client.get(url);
 			console.log(chalk.yellow('         ... status is ' + response.data.status));
 			if (response && response.data.status == 'ACTIVE') {
+				
 				return response;
 			} else {
 				const timeout = 5000 * i * 10;
@@ -247,12 +293,12 @@ class astraClient {
 
 	async findKeyspaces(db) {
 		this.keyspaces = [];
-
 		response = await this.client.get('/v2/databases/' + db);
 
 		response.data.info.keyspaces.forEach((keyspace) => {
 			this.keyspaces.push({ value: keyspace, title: keyspace });
 		});
+		
 		return this.keyspaces
 	}
 
@@ -282,28 +328,27 @@ async function getTokens() {
 		console.log('    Select "Token Management" from the left-hand column');
 		console.log('    Select "Database Administrator" in the Role dropdown');
 		console.log('    Click "Generate Token"');
-		console.log('    Download the token information to your system, and use the values to fill out the questions.')
+		console.log('    Save to CSV if you want to access it later');
 
-		const questions = [	{ type: 'text', name: 'dbid', message: 'Please paste the Database ID here \n'},
-							{ type: 'text', name: 'secret', message: 'Please paste the Customer Secret here\n'}, 
-							{ type: 'text', name: 'token', message: 'Please paste the Database Admin Token (Token) here\n'}, 
-							
-							];
-		const response = await prompts(questions);
-		console.log(response);
+        const questions = [	
+        { type: 'text', name: 'dbid', message: 'Please paste the Database ID here \n'},
+        { type: 'text', name: 'secret', message: 'Please paste the Client Secret here\n'}, 
+        { type: 'text', name: 'token', message: 'Please paste the Database Admin Token (Token) here\n'}, 
+        ];
+        const response = await prompts(questions);
+        console.log(response);
 
-		let admin_token = response.token.replace(/"/g, '');
-		setEnv("ASTRA_DB_ADMIN_TOKEN",  admin_token);
-		setEnv("ASTRA_DB_APPLICATION_TOKEN",  admin_token);
+        let admin_token = response.token.replace(/"/g, '');
+        setEnv("ASTRA_DB_ADMIN_TOKEN",  admin_token);
+        setEnv("ASTRA_DB_APPLICATION_TOKEN",  admin_token);
 
-		let dbid = response.dbid.replace(/"/g, '');
-		setEnv("ASTRA_DB_ID",  dbid);
-		
-		let secret = response.secret.replace(/"/g, '');
-		setEnv("ASTRA_SECRET",  secret);
-		
-		
-		
+        let dbid = response.dbid.replace(/"/g, '');
+        setEnv("ASTRA_DB_ID",  dbid);
+
+        let secret = response.secret.replace(/"/g, '');
+        setEnv("ASTRA_SECRET",  secret);
+
+
 	return dotenv;
 }
 
@@ -328,6 +373,8 @@ async function start() {
 		process.exit(0);
 	}
 
+	let newToken = await client.getNewAuthToken();
+
 	console.log(chalk.yellow('Credentials set up, checking database'));
 	if (argv_database != '' && argv_keyspace != '') {
 		let existing = await client.findDatabasebyName(argv_database, true);
@@ -335,6 +382,9 @@ async function start() {
 			await client.createDB(argv_database, argv_keyspace);
 			await client.findDatabasebyName(argv_database, true);
 			setEnv("ASTRA_DB_KEYSPACE", argv_keyspace );
+			console.log(chalk.yellow("Setting up secure bundle"))
+			await client.getBundle(client.db.id)
+			
 		} else { 
 			console.log (chalk.yellow('    existing ' + argv_database + ' database found.'))
 			let keyspaces = await client.findKeyspaces(existing.id);
@@ -353,11 +403,16 @@ async function start() {
 				await client.createNewKeyspace(existing.id, argv_keyspace)	
 				console.log(chalk.yellow("    keyspace " + argv_keyspace + " created"))			
 			}
+			
 			setEnv("ASTRA_DB_ID", client.db.value );
 			setEnv("ASTRA_DB_REGION", client.db.region);
 			setEnv("ASTRA_DB_KEYSPACE", argv_keyspace );
 			setEnv("ASTRA_GRAPHQL_ENDPOINT", "https://" + client.db.value + "-" + client.db.region + ".apps.astra.datastax.com/api/graphql/" + client.db.keyspace)
+			console.log(chalk.yellow("Setting up secure bundle"))
+			await client.getBundle(client.db.value)
 		}
+		
+		
 		return;
 	}
 	let onSubmit = (prompt, answer) => console.log(`Thanks, moving forward with: ${answer}`);
@@ -458,9 +513,15 @@ async function start() {
 			}
 			setEnv("ASTRA_DB_KEYSPACE", keyspace.keyspace );
 
-			process.exit();
+			
 			break;
 	}
+	console.log(chalk.yellow("Setting up secure bundle"))
+	await client.getBundle(client.db.id)
+
+	process.exit();
+			
+	
 }
 
 async function setEnv(variable, value) {
