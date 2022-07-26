@@ -60,6 +60,25 @@ class astraClient {
 	
 	};
 
+	async getBundle(databaseId) {
+		this.client = await astraRest.createClient({
+				applicationToken: this.token,
+				baseUrl: 'https://api.astra.datastax.com',
+			});
+
+		try {
+				response = await this.client.get('/v2/databases/' + databaseId + '/secureBundleURL');
+				console.log("URL: " + response)
+				setEnv("ASTRA_BUNDLE", response );
+				return response
+				
+			} catch (e) {
+				console.log(e)
+				throw new Error("Invalid token")
+			}
+	
+	};
+
 	async checkAuth() {
 		this.keyspaces = [];
 		try {
@@ -86,6 +105,7 @@ class astraClient {
 		}
 
 		dbID = this.db.value;
+		console.log(this.db);
 		setEnv("ASTRA_DB_ID", this.db.value );
 		setEnv("ASTRA_DB_REGION", this.db.region);
 		setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
@@ -106,6 +126,9 @@ class astraClient {
 				setEnv("ASTRA_DB_KEYSPACE", astra_keyspace );
 			}
 		});
+
+		// Get the zip bundle
+
 	}
 	async findDatabases() {
 		axios.defaults.headers.common['Authorization'] = 'Bearer ' + process.env.ASTRA_DB_ADMIN_TOKEN;
@@ -259,14 +282,28 @@ async function getTokens() {
 		console.log('    Select "Token Management" from the left-hand column');
 		console.log('    Select "Database Administrator" in the Role dropdown');
 		console.log('    Click "Generate Token"');
-		console.log('    Save to CSV if you want to access it later');
+		console.log('    Download the token information to your system, and use the values to fill out the questions.')
 
-		const questions = [{ type: 'text', name: 'token', message: 'Please paste the Database Admin Token here\n' }];
+		const questions = [	{ type: 'text', name: 'dbid', message: 'Please paste the Database ID here \n'},
+							{ type: 'text', name: 'secret', message: 'Please paste the Customer Secret here\n'}, 
+							{ type: 'text', name: 'token', message: 'Please paste the Database Admin Token (Token) here\n'}, 
+							
+							];
 		const response = await prompts(questions);
+		console.log(response);
 
 		let admin_token = response.token.replace(/"/g, '');
 		setEnv("ASTRA_DB_ADMIN_TOKEN",  admin_token);
 		setEnv("ASTRA_DB_APPLICATION_TOKEN",  admin_token);
+
+		let dbid = response.dbid.replace(/"/g, '');
+		setEnv("ASTRA_DB_ID",  dbid);
+		
+		let secret = response.secret.replace(/"/g, '');
+		setEnv("ASTRA_SECRET",  secret);
+		
+		
+		
 	return dotenv;
 }
 
