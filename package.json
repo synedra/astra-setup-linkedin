@@ -1,8 +1,8 @@
 {
-  "name": "astra-setup",
-  "version": "0.1.22",
+  "name": "astra-setup-linkedin",
+  "version": "0.2.0",
 
-  "description": "Netlify Build plugin - This plugin connects your netlify instance to an Astra database backend, including a managed Cassandra database and HTTP APIs through Stargate.",
+  "description": "Basic package for setting up astra connections in gitpod workspaces",
   "main": "src/astra-setup.js",
   "files": [
     "src/astra-setup.js"
