@@ -1,4 +1,3 @@
-
 #!/usr/bin/env node
 const astraCollections = require('@astrajs/collections');
 const astraRest = require('@astrajs/rest');
@@ -94,13 +93,7 @@ class astraClient {
 					.pipe(unzipper.Extract({ path: os.homedir() + '/.cassandra/'}))
 					.promise()
 
-				fs.unlink(os.homedir() + '/.cassandra/cqlshrc', (err => {
-					if (err) console.log(err);
-					else {
-					  console.log("\nDeleted file: cqlshrc");
-					}
-				  }));
-				}
+				
 
 			
 	async getZip(downloadURL) {
