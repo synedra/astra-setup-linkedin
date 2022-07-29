@@ -336,10 +336,10 @@ async function getTokens() {
         setEnv("ASTRA_DB_APPLICATION_TOKEN",  admin_token);
 
         let dbid = response.dbid.replace(/"/g, '');
-        setEnv("ASTRA_DB_ID",  dbid);
+        setEnv("ASTRA_DB_CLIENT_ID",  dbid);
 
         let secret = response.secret.replace(/"/g, '');
-        setEnv("ASTRA_SECRET",  secret);
+        setEnv("ASTRA_DB_CLIENT_SECRET",  secret);
 
 
 	return dotenv;
