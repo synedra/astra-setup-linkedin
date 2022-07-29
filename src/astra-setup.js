@@ -94,7 +94,7 @@ class astraClient {
 					.promise()
 
 				
-
+			}
 			
 	async getZip(downloadURL) {
 		return new Promise((resolve) => {
