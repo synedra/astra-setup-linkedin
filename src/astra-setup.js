@@ -92,17 +92,6 @@ class astraClient {
 				await fs.createReadStream(os.homedir() + '/.cassandra/bootstrap.zip')
 					.pipe(unzipper.Extract({ path: os.homedir() + '/.cassandra/'}))
 					.promise()
-
-				let cqlshrccontents = "[authentication]\nusername = ${CLIENT_ID}\npassword = ${CLIENT_SECRET}\n"
-				cqlshrccontents += "[connection]\nsecure_connect_bundle = ${PATH_TO_SECURE_BUNBLE.zip}"
-
-				// Open file demo.txt in read mode
-				fs.open(os.homedir() + '/.cassandra/cqlshrc', 'w', function (err, f) {
-					let buf = Buffer.from(cqlshrccontents)
-
- 					fs.write(fd, buf, 0, buf.length, 0)
-					console.log('Saved!');
-  				});
 				
 			}
 			
@@ -331,26 +320,26 @@ async function getTokens() {
 		console.log('    Select "Token Management" from the left-hand column');
 		console.log('    Select "Database Administrator" in the Role dropdown');
 		console.log('    Click "Generate Token"');
-		console.log('    Save to CSV if you want to access it later');
+		console.log('    Save the file to CSV.');
+		console.log('    Open the file and COPY the contents to the clipboard');
+		console.log('    Paste the contents here:');
 
-        const questions = [	
-        { type: 'text', name: 'dbid', message: 'Please paste the Database ID here \n'},
-        { type: 'text', name: 'secret', message: 'Please paste the Client Secret here\n'}, 
-        { type: 'text', name: 'token', message: 'Please paste the Database Admin Token (Token) here\n'}, 
-        ];
-        const response = await prompts(questions);
-        console.log(response);
-
-        let admin_token = response.token.replace(/"/g, '');
-        setEnv("ASTRA_DB_ADMIN_TOKEN",  admin_token);
-        setEnv("ASTRA_DB_APPLICATION_TOKEN",  admin_token);
-
-        let dbid = response.dbid.replace(/"/g, '');
-        setEnv("ASTRA_DB_CLIENT_ID",  dbid);
-
-        let secret = response.secret.replace(/"/g, '');
-        setEnv("ASTRA_DB_CLIENT_SECRET",  secret);
-
+		const rl = readline.createInterface({
+			input: process.stdin, //or fileStream 
+			output: process.stdout
+		  });
+		  
+		  for await (const line of rl) {
+			if (line.match('Client Id')) {
+				console.log("Reading secrets")
+			} else if (line.match('"')) {
+				let variables = line.split('"')
+				setEnv("ASTRA_DB_CLIENT_ID", variables[1] );
+				setEnv("ASTRA_DB_CLIENT_SECRET", variables[3] );
+				setEnv("ASTRA_DB_ADMIN_TOKEN", variables[7] );
+				rl.close();
+			}
+		  }
 
 	return dotenv;
 }
@@ -358,6 +347,30 @@ async function getTokens() {
 let dbID = '';
 
 start();
+
+function readLine (line) {
+    if (lineNumber == 0) {
+        if (!isNaN(parseInt(line))) {
+            NumOfNum = parseInt(line);
+            lineNumber++;
+            console.log("Provide " + NumOfNum + " numbers sepearted by space to add: ");
+        } else {
+            console.log("Invalid Input");
+        }
+    } else {
+        var sum = line.split(" ");
+        if (sum.length != NumOfNum) {
+            console.log("Given more/less than " + NumOfNum + " Try again");
+        } else {
+            sum = sum.reduce(function(a, b) {
+              return (a*1) + (b*1);
+            });
+            console.log("Total: " + sum);
+            process.exit();
+        }
+    }
+}
+
 
 async function start() {
 	console.log(chalk.yellow('Checking your credentials...\n'));
