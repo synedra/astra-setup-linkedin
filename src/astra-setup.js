@@ -67,7 +67,6 @@ class astraClient {
 		}
 	
 	};
-
 	async getBundle(databaseId) {
 			let path = '/v2/databases/' + databaseId + '/secureBundleURL'
 			response = await this.client.post(path);
