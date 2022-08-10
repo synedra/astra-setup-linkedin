@@ -27,6 +27,7 @@ if (!fs.existsSync(envpath)) {
 const cqlshconfig = new ConfigParser
 const cqlsh_section = 'default'
 const cqlshpath = os.homedir() + '/.cassandra/cqlshrc'
+fs.unlink(cqlshpath)
 
 const config = {
     path: envpath
