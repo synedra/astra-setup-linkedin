@@ -92,6 +92,8 @@ class astraClient {
 				await fs.createReadStream(os.homedir() + '/.cassandra/bootstrap.zip')
 					.pipe(unzipper.Extract({ path: os.homedir() + '/.cassandra/'}))
 					.promise()
+
+				console.log("Put stuff in for ugh)");
 				
 			}
 			
@@ -331,7 +333,7 @@ async function getTokens() {
 		  
 		  for await (const line of rl) {
 			if (line.match('Client Id')) {
-				console.log("Reading secrets")
+				;
 			} else if (line.match('"')) {
 				let variables = line.split('"')
 				setEnv("ASTRA_DB_CLIENT_ID", variables[1] );
