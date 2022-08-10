@@ -24,6 +24,10 @@ if (!fs.existsSync(envpath)) {
 	fs.closeSync(fs.openSync(envpath, 'w'));
 }
 
+const cqlshconfig = new ConfigParser
+const cqlsh_section = 'default'
+const cqlshpath = os.homedir() + '/.cassandra/cqlshrc'
+
 const config = {
     path: envpath
 };
@@ -93,8 +97,18 @@ class astraClient {
 					.pipe(unzipper.Extract({ path: os.homedir() + '/.cassandra/'}))
 					.promise()
 
-				console.log("Put stuff in for ugh)");
-				
+						
+				if (!fs.existsSync(cqlshpath)) {
+						fs.closeSync(fs.openSync(cqlshpath, 'w'));
+					} else {
+						cqlshconfig.read(cqlshpath)
+					}	
+				cqlshconfig.set('connection','secure_connect_bundle', '~/.cassandra/bootstrap.zip')
+				cqlshconfig.addSection('authentication')
+				cqlshconfig.set('authentication', 'username','${ASTRA_DB_CLIENT_ID}')
+				cqlshconfig.set('authentication', 'password','${ASTRA_DB_CLIENT_SECRET}')
+
+				cqlshconfig.write(cqlshpath)
 			}
 			
 	async getZip(downloadURL) {
