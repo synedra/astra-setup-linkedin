@@ -93,6 +93,16 @@ class astraClient {
 					.pipe(unzipper.Extract({ path: os.homedir() + '/.cassandra/'}))
 					.promise()
 
+				let cqlshrccontents = "[authentication]\nusername = ${CLIENT_ID}\npassword = ${CLIENT_SECRET}\n"
+				cqlshrccontents += "[connection]\nsecure_connect_bundle = ${PATH_TO_SECURE_BUNBLE.zip}"
+
+				// Open file demo.txt in read mode
+				fs.open(os.homedir() + '/.cassandra/cqlshrc', 'w', function (err, f) {
+					let buf = Buffer.from(cqlshrccontents)
+
+ 					fs.write(fd, buf, 0, buf.length, 0)
+					console.log('Saved!');
+  				});
 				
 			}
 			
