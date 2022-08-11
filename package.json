@@ -1,6 +1,6 @@
 {
   "name": "astra-setup-linkedin",
-  "version": "0.3.4",
+  "version": "0.3.5",
 
   "description": "Basic package for setting up astra connections in gitpod workspaces",
   "main": "src/astra-setup.js",
