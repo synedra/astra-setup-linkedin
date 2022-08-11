@@ -27,7 +27,6 @@ if (!fs.existsSync(envpath)) {
 const cqlshconfig = new ConfigParser
 const cqlsh_section = 'default'
 const cqlshpath = os.homedir() + '/.cassandra/cqlshrc'
-fs.unlink(cqlshpath)
 
 const config = {
     path: envpath
@@ -98,11 +97,7 @@ class astraClient {
 					.promise()
 
 						
-				if (!fs.existsSync(cqlshpath)) {
-						fs.closeSync(fs.openSync(cqlshpath, 'w'));
-					} else {
-						cqlshconfig.read(cqlshpath)
-					}	
+				fs.closeSync(fs.openSync(cqlshpath, 'w'));
 				cqlshconfig.set('connection','secure_connect_bundle', '~/.cassandra/bootstrap.zip')
 				cqlshconfig.addSection('authentication')
 				cqlshconfig.set('authentication', 'username','${ASTRA_DB_CLIENT_ID}')
